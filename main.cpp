@@ -8,5 +8,8 @@ int main(int argc, char** argv)
     QApplication qapp(argc, argv);
 
     MyGLDrawer* widget = new MyGLDrawer();
-    return qapp.exec();
+    widget->show();
+    int ret = qapp.exec();
+    delete widget;
+    return ret;
 }
