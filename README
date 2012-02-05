@@ -1,0 +1,12 @@
+jmfairlie at gmail dot com
+
+
+building
+----------
+cd glexperiment
+qmake
+make
+
+
+
+
