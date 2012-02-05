@@ -1,7 +1,6 @@
 #ifndef MYGLDRAWER_H
 #define MYGLDRAWER_H
 
-
 #include <QtGui>
 #include<QtOpenGL>
 #include<QGLWidget>
@@ -44,12 +43,12 @@ class MyGLDrawer : public QGLWidget
          glEnable(GL_DEPTH_TEST);
          assert(setUpProgram());
          assert(setUpAttributes());
-         DEBUGMSG("GL Error: 0x%x\n", glGetError());
+
      }
 
      void resizeGL(int w, int h)
      {
-
+        glViewport(0,0,w,h);
      }
 
      void paintGL()
@@ -57,7 +56,6 @@ class MyGLDrawer : public QGLWidget
          // draw the scene:
          glClear(GL_COLOR_BUFFER_BIT);
          glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_BYTE, 0);
-
      }
 
      int setUpAttributes()
@@ -65,12 +63,11 @@ class MyGLDrawer : public QGLWidget
         GLubyte indices[] = {0, 1, 2};
 
         GLfloat afVertices[] = {
-                               -1.0f,  0.0f, 0.0f,
+                               -1.0f, -1.0f, 0.0f,
                                 0.0f,  1.0f, 0.0f,
-                                1.0f,  1.0f, 0.0f
+                                1.0f, -1.0f, 0.0f
                                };
 
-        DEBUGMSG("GL Error: 0x%x\n", glGetError());
         glGenBuffers(1, &m_vert_buffer);
 
         glBindBuffer(GL_ARRAY_BUFFER, m_vert_buffer);
@@ -88,7 +85,6 @@ class MyGLDrawer : public QGLWidget
 
      int setUpProgram()
      {
-         DEBUGMSG("GL Error: 0x%x\n", glGetError());
          const char* pszFragShader = "\
                  void main (void)\
                  {\
@@ -147,11 +143,8 @@ class MyGLDrawer : public QGLWidget
          glAttachShader(m_program, m_frag_shader);
          glAttachShader(m_program, m_vert_shader);
 
-         int max=-1;
-         glGetIntegerv(	GL_MAX_VERTEX_ATTRIBS, &max);
-         DEBUGMSG("GL Error: 0x%x  %d %d\n", glGetError(), max, glIsProgram(m_program));
          glBindAttribLocation(m_program, m_pos_attr_loc, "myVertex");
-DEBUGMSG("GL Error: 0x%x  %d\n", glGetError(), max);
+
          glLinkProgram(m_program);
 
          GLint bLinked;
@@ -170,7 +163,7 @@ DEBUGMSG("GL Error: 0x%x  %d\n", glGetError(), max);
 
             glUseProgram(m_program);
 
-            glClearColor(1.0,0.0,1.0,1.0);
+            glClearColor(0.6f, 0.8f, 1.0f, 1.0f);//pvr blue!
            return 1;
      }
 
