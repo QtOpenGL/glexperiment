@@ -26,6 +26,8 @@ class MyGLDrawer : public QGLWidget
 
      void paintGL();
 
+     bool event(QEvent * ev);
+
      int setUpAttributes();
      
      int setUpUniforms();

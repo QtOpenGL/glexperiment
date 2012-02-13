@@ -48,6 +48,21 @@ void MyGLDrawer::paintGL()
    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_BYTE, 0);
 }
 
+bool MyGLDrawer::event(QEvent * ev)
+{
+    if(ev->type() == QEvent::KeyPress)
+    {
+        QKeyEvent *qe((QKeyEvent*)ev);
+        switch(qe->key())
+        {
+            case Qt::Key_Escape:
+            QWidget::close();
+            break;
+        }
+    }
+    return QGLWidget::event(ev);
+}
+
 int MyGLDrawer::setUpAttributes()
 {
   GLubyte indices[] = {0, 1, 2};
@@ -92,6 +107,7 @@ int MyGLDrawer::setUpUniforms()
   
   m_tex_uni_loc=glGetUniformLocation(m_program, "sTex");
   DEBUGMSG("GL Error: 0x%x\n", glGetError());
+  assert(m_tex_uni_loc != -1);
   glUniform1i(m_tex_uni_loc, 0);
   DEBUGMSG("GL Error: 0x%x\n", glGetError());
  
