@@ -10,12 +10,6 @@
 #include "GL/gl.h"
 #include "GL/glext.h"
 
-#ifndef NDEBUG
-    #define DEBUGMSG(...) fprintf(stdout, __VA_ARGS__)
-#else
-    #define DEBUGMSG(...)
-#endif
-
 class MyGLDrawer : public QGLWidget
  {
      Q_OBJECT        // must include this if you use Qt signals/slots

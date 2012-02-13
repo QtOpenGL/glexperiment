@@ -1,4 +1,11 @@
 #include "mygldrawer.h"
+#include <iostream>
+
+#ifndef NDEBUG
+    #define DEBUGMSG(format, args...) fprintf(stdout, "DEBUG %s:%d: %s: "format, __FILE__, __LINE__,__FUNCTION__, ##args)
+#else
+    #define DEBUGMSG(format, args...)  void(0)
+#endif
 
 
 MyGLDrawer::MyGLDrawer(QWidget *parent): QGLWidget(parent), m_pos_attr_loc(0), m_tex_attr_loc(1), m_image(NULL)
