@@ -96,21 +96,19 @@ int MyGLDrawer::setUpAttributes()
 
 int MyGLDrawer::setUpUniforms()
 {
-  
+    m_tex_uni_loc=glGetUniformLocation(m_program, "sTex");
+    assert(m_tex_uni_loc != -1);
+    glUniform1i(m_tex_uni_loc, 0);
+
   glActiveTexture(GL_TEXTURE0);
   glEnable(GL_TEXTURE_2D);
   glGenTextures(1, &m_tex_name);
   
   glBindTexture(GL_TEXTURE_2D, m_tex_name);
-   
-  glTexImage2D(GL_TEXTURE_2D, 0,  GL_RGB, m_image->width(), m_image->height(), 0, GL_RGB, GL_UNSIGNED_BYTE, m_image->bits());
-  
-  m_tex_uni_loc=glGetUniformLocation(m_program, "sTex");
-  DEBUGMSG("GL Error: 0x%x\n", glGetError());
-  assert(m_tex_uni_loc != -1);
-  glUniform1i(m_tex_uni_loc, 0);
-  DEBUGMSG("GL Error: 0x%x\n", glGetError());
- 
+
+  glTexImage2D(GL_TEXTURE_2D, 0,  GL_RGBA, m_image->width(), m_image->height(),
+               0, GL_RGBA, GL_UNSIGNED_BYTE, m_image->bits());
+
   return 1;
 }
 
@@ -134,8 +132,7 @@ int MyGLDrawer::setUpProgram()
        vTexCoords = aTexCoords;\
    }";
 
-   GLuint m_frag_shader, m_vert_shader;
-   GLuint m_program;
+
    m_frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
 
    glShaderSource(m_frag_shader, 1, (const char**)&pszFragShader, NULL);
@@ -175,7 +172,7 @@ int MyGLDrawer::setUpProgram()
    }
 
    m_program = glCreateProgram();
-
+   DEBUGMSG( "m_program : %d \n", m_program);
    glAttachShader(m_program, m_frag_shader);
    glAttachShader(m_program, m_vert_shader);
 
