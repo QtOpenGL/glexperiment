@@ -2,23 +2,21 @@
 #include <iostream>
 
 #ifndef NDEBUG
-    #define DEBUGMSG(format, args...) fprintf(stdout, "DEBUG %s:%d: %s: "format, __FILE__, __LINE__,__FUNCTION__, ##args)
+    #define DEBUGMSG(format, args...) printf("DEBUG %s:%d: %s: "format, __FILE__, __LINE__,__FUNCTION__, ##args)
 #else
     #define DEBUGMSG(format, args...)  void(0)
 #endif
 
 
-MyGLDrawer::MyGLDrawer(QWidget *parent): QGLWidget(parent), m_pos_attr_loc(0), m_tex_attr_loc(1), m_image(NULL)
+MyGLDrawer::MyGLDrawer(QWidget *parent): QGLWidget(parent), m_pos_attr_loc(0), m_tex_attr_loc(1)
 {
-  m_image = new QImage("resources/images/copper.jpg");
-  m_image->convertToFormat(QImage::Format_ARGB32);
-  DEBUGMSG("exists %d image: 0x%p %dx%d\n",QFile::exists(QString("resources/images/copper.jpg")), m_image, m_image->width(), m_image->height());
+  m_image = QGLWidget::convertToGLFormat(QImage("../resources/images/copper.jpg"));
+  DEBUGMSG("exists %d image  %dx%d\n",QFile::exists(QString("../resources/images/copper.jpg")), m_image.width(), m_image.height());
 }
 
 MyGLDrawer::~MyGLDrawer()
 {
   makeCurrent();
-  delete m_image;
   glDeleteProgram(m_program);
   glDeleteShader(m_frag_shader);
   glDeleteShader(m_vert_shader);
@@ -30,10 +28,20 @@ MyGLDrawer::~MyGLDrawer()
 void MyGLDrawer::initializeGL()
 {
    // Set up the rendering context, define display lists etc.:
+   glClearColor(0.6f, 0.8f, 1.0f, 1.0f);//pvr blue!
    glEnable(GL_DEPTH_TEST);
-   assert(setUpProgram());
-   assert(setUpAttributes());
-   assert(setUpUniforms());
+
+   bool progok = setUpProgram();
+   assert(progok);
+
+   bool attribok = setUpAttributes();
+   assert(attribok);
+
+   bool texok = setUpTextures();
+   assert(texok);
+
+   bool uniok = setUpUniforms();
+   assert(uniok);
 }
 
 void MyGLDrawer::resizeGL(int w, int h)
@@ -43,8 +51,8 @@ void MyGLDrawer::resizeGL(int w, int h)
 
 void MyGLDrawer::paintGL()
 {
-   // draw the scene:
-   glClear(GL_COLOR_BUFFER_BIT);
+    // draw the scene:
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_BYTE, 0);
 }
 
@@ -99,17 +107,30 @@ int MyGLDrawer::setUpUniforms()
     m_tex_uni_loc=glGetUniformLocation(m_program, "sTex");
     assert(m_tex_uni_loc != -1);
     glUniform1i(m_tex_uni_loc, 0);
-
-  glActiveTexture(GL_TEXTURE0);
-  glEnable(GL_TEXTURE_2D);
-  glGenTextures(1, &m_tex_name);
-  
-  glBindTexture(GL_TEXTURE_2D, m_tex_name);
-
-  glTexImage2D(GL_TEXTURE_2D, 0,  GL_RGBA, m_image->width(), m_image->height(),
-               0, GL_RGBA, GL_UNSIGNED_BYTE, m_image->bits());
-
   return 1;
+}
+
+int MyGLDrawer::setUpTextures()
+{
+    glActiveTexture(GL_TEXTURE0);
+    glGenTextures(1, &m_tex_name);
+    glBindTexture(GL_TEXTURE_2D, m_tex_name);
+
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+
+
+    glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_RGBA,
+                 m_image.width(),
+                 m_image.height(),
+                 0,
+                 GL_RGBA,
+                 GL_UNSIGNED_BYTE,
+                 m_image.bits());
+
+    return 1;
 }
 
 int MyGLDrawer::setUpProgram()
@@ -196,7 +217,5 @@ int MyGLDrawer::setUpProgram()
    }
 
   glUseProgram(m_program);
-
-  glClearColor(0.6f, 0.8f, 1.0f, 1.0f);//pvr blue!
   return 1;
 }
