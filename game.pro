@@ -11,14 +11,16 @@ INCLUDEPATH += inc \
                "/usr/include"
 
  CONFIG(debug, debug|release) {
-    DESTDIR = debug
-     TARGET = debug_game
+     DESTDIR = debug
 
  } else {
     DESTDIR = release
-    TARGET = release_game
     DEFINES += NDEBUG
  }
 
 HEADERS += \
     inc/mygldrawer.h
+
+RESOURCES = res.qrc
+
+DEPENDPATH = += ./resources

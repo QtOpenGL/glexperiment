@@ -36,6 +36,8 @@ class MyGLDrawer : public QGLWidget
 
      int setUpTextures();
 
+     int setupShaders();
+
     GLuint m_program;
     GLuint m_frag_shader;
     GLuint m_vert_shader;
@@ -46,5 +48,7 @@ class MyGLDrawer : public QGLWidget
     uint m_tex_name;
     int m_tex_uni_loc;
     QImage m_image;
- };
+  private:
+    int createShader(int, QString);
+};
 #endif // MYGLDRAWER_H

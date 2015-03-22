@@ -1,0 +1,8 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+  <qresource>
+    <file alias="copper.jpg">resources/images/copper.jpg</file>
+    <file alias="default.frag">resources/shaders/default.frag</file>
+    <file alias="default.vert">resources/shaders/default.vert</file>
+  </qresource>
+</RCC>

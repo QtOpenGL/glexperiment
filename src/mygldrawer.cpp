@@ -10,8 +10,8 @@
 
 MyGLDrawer::MyGLDrawer(QWidget *parent): QGLWidget(parent), m_pos_attr_loc(0), m_tex_attr_loc(1)
 {
-  m_image = QGLWidget::convertToGLFormat(QImage("../resources/images/copper.jpg"));
-  DEBUGMSG("exists %d image  %dx%d\n",QFile::exists(QString("../resources/images/copper.jpg")), m_image.width(), m_image.height());
+  m_image = QGLWidget::convertToGLFormat(QImage(":/copper.jpg"));
+  DEBUGMSG("exists %d image  %dx%d\n",QFile::exists(QString(":/copper.jpg")), m_image.width(), m_image.height());
 }
 
 MyGLDrawer::~MyGLDrawer()
@@ -30,6 +30,9 @@ void MyGLDrawer::initializeGL()
    // Set up the rendering context, define display lists etc.:
    glClearColor(0.6f, 0.8f, 1.0f, 1.0f);//pvr blue!
    glEnable(GL_DEPTH_TEST);
+
+   bool shaderok = setupShaders();
+   assert(shaderok);
 
    bool progok = setUpProgram();
    assert(progok);
@@ -64,6 +67,7 @@ bool MyGLDrawer::event(QEvent * ev)
         switch(qe->key())
         {
             case Qt::Key_Escape:
+            case Qt::Key_Q:
             QWidget::close();
             break;
         }
@@ -133,65 +137,49 @@ int MyGLDrawer::setUpTextures()
     return 1;
 }
 
+
+
+int MyGLDrawer::setupShaders()
+{
+  m_frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
+  QString fragpath(":/default.frag");
+  m_vert_shader = glCreateShader(GL_VERTEX_SHADER);
+  QString vertpath(":/default.vert");
+  return createShader(m_frag_shader, fragpath) && createShader(m_vert_shader, vertpath);
+}
+
+int MyGLDrawer::createShader(int shaderid, QString shaderpath)
+{
+  QFile s(shaderpath);
+  s.open(QFile::ReadOnly | QFile::Text);
+  QTextStream in(&s);
+  QString str = in.readAll();
+  const char * pchar = str.toLocal8Bit().constData();
+  glShaderSource(shaderid, 1,(const char**)&pchar, NULL);
+
+  glCompileShader(shaderid);
+
+  GLint bShaderCompiled;
+  glGetShaderiv(shaderid, GL_COMPILE_STATUS, &bShaderCompiled);
+
+  s.close();
+  if (!bShaderCompiled)
+  {
+     int i32InfoLogLength, i32CharsWritten;
+     glGetShaderiv(shaderid, GL_INFO_LOG_LENGTH, &i32InfoLogLength);
+
+     char* pszInfoLog = new char[i32InfoLogLength];
+     glGetShaderInfoLog(shaderid, i32InfoLogLength, &i32CharsWritten, pszInfoLog);
+
+     DEBUGMSG("Failed to compile shader: %s\n", pszInfoLog);
+     delete [] pszInfoLog;
+     return 0;
+  }
+  return 1;
+}
+
 int MyGLDrawer::setUpProgram()
 {
-   const char* pszFragShader = "\
-           varying vec2 vTexCoords;\
-           uniform sampler2D sTex;\
-           void main (void)\
-           {\
-               gl_FragColor = texture2D(sTex, vTexCoords);\
-           }";
-
-   const char* pszVertShader = "\
-   attribute vec4	aVertex;\
-   attribute vec2 aTexCoords;\
-   varying vec2 vTexCoords;\
-   void main(void)\
-   {\
-       gl_Position = aVertex;\
-       vTexCoords = aTexCoords;\
-   }";
-
-
-   m_frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
-
-   glShaderSource(m_frag_shader, 1, (const char**)&pszFragShader, NULL);
-
-   glCompileShader(m_frag_shader);
-
-   GLint bShaderCompiled;
-   glGetShaderiv(m_frag_shader, GL_COMPILE_STATUS, &bShaderCompiled);
-
-   if (!bShaderCompiled)
-   {
-       int i32InfoLogLength, i32CharsWritten;
-       glGetShaderiv(m_frag_shader, GL_INFO_LOG_LENGTH, &i32InfoLogLength);
-
-       char* pszInfoLog = new char[i32InfoLogLength];
-       glGetShaderInfoLog(m_frag_shader, i32InfoLogLength, &i32CharsWritten, pszInfoLog);
-
-       DEBUGMSG("Failed to compile fragment shader: %s\n", pszInfoLog);
-       delete [] pszInfoLog;
-       return 0;
-   }
-
-   m_vert_shader = glCreateShader(GL_VERTEX_SHADER);
-   glShaderSource(m_vert_shader, 1, (const char**)&pszVertShader, NULL);
-   glCompileShader(m_vert_shader);
-   glGetShaderiv(m_vert_shader, GL_COMPILE_STATUS, &bShaderCompiled);
-
-   if (!bShaderCompiled)
-   {
-       int i32InfoLogLength, i32CharsWritten;
-       glGetShaderiv(m_vert_shader, GL_INFO_LOG_LENGTH, &i32InfoLogLength);
-       char* pszInfoLog = new char[i32InfoLogLength];
-       glGetShaderInfoLog(m_vert_shader, i32InfoLogLength, &i32CharsWritten, pszInfoLog);
-       DEBUGMSG("Failed to compile vertex shader: %s\n", pszInfoLog);
-       delete [] pszInfoLog;
-       return 0;
-   }
-
    m_program = glCreateProgram();
    DEBUGMSG( "m_program : %d \n", m_program);
    glAttachShader(m_program, m_frag_shader);
