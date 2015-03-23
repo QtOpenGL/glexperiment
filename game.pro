@@ -1,7 +1,8 @@
 TEMPLATE = app
 CONFIG +=  debug_and_release
 SOURCES += main.cpp \
-           src/mygldrawer.cpp
+           src/mygldrawer.cpp \
+           src/helper.cpp
 QT+= opengl
 
 #for some reason the programmable pipeline API is defined as an extension
@@ -20,6 +21,7 @@ INCLUDEPATH += inc \
 
 HEADERS += \
     inc/mygldrawer.h
+    inc/helper.hpp
 
 RESOURCES = res.qrc
 

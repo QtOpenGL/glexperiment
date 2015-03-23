@@ -5,10 +5,6 @@
 #include<QtOpenGL>
 #include<QGLWidget>
 #include<QImage>
-#include<QFile>
-#include <assert.h>
-#include "GL/gl.h"
-#include "GL/glext.h"
 
 class MyGLDrawer : public QGLWidget
  {

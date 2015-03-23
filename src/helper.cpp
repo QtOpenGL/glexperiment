@@ -1,0 +1,6 @@
+#include "helper.hpp"
+
+VERIFYSTATUSFUNCDEF(Shader, COMPILE);
+VERIFYSTATUSFUNCDEF(Program, LINK);
+
+

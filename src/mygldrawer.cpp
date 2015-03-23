@@ -1,12 +1,8 @@
 #include "mygldrawer.h"
+#include "helper.hpp"
 #include <iostream>
-
-#ifndef NDEBUG
-    #define DEBUGMSG(format, args...) printf("DEBUG %s:%d: %s: "format, __FILE__, __LINE__,__FUNCTION__, ##args)
-#else
-    #define DEBUGMSG(format, args...)  void(0)
-#endif
-
+#include<QFile>
+#include <assert.h>
 
 MyGLDrawer::MyGLDrawer(QWidget *parent): QGLWidget(parent), m_pos_attr_loc(0), m_tex_attr_loc(1)
 {
@@ -30,21 +26,22 @@ void MyGLDrawer::initializeGL()
    // Set up the rendering context, define display lists etc.:
    glClearColor(0.6f, 0.8f, 1.0f, 1.0f);//pvr blue!
    glEnable(GL_DEPTH_TEST);
+   bool ok = 0;
 
-   bool shaderok = setupShaders();
-   assert(shaderok);
+   ok = setupShaders();
+   assert(ok);
 
-   bool progok = setUpProgram();
-   assert(progok);
+   ok = setUpProgram();
+   assert(ok);
 
-   bool attribok = setUpAttributes();
-   assert(attribok);
+   ok = setUpAttributes();
+   assert(ok);
 
-   bool texok = setUpTextures();
-   assert(texok);
+   ok = setUpTextures();
+   assert(ok);
 
-   bool uniok = setUpUniforms();
-   assert(uniok);
+   ok = setUpUniforms();
+   assert(ok);
 }
 
 void MyGLDrawer::resizeGL(int w, int h)
@@ -137,15 +134,13 @@ int MyGLDrawer::setUpTextures()
     return 1;
 }
 
-
-
 int MyGLDrawer::setupShaders()
 {
   m_frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
   QString fragpath(":/default.frag");
   m_vert_shader = glCreateShader(GL_VERTEX_SHADER);
   QString vertpath(":/default.vert");
-  return createShader(m_frag_shader, fragpath) && createShader(m_vert_shader, vertpath);
+  return createShader(m_vert_shader, vertpath) && createShader(m_frag_shader, fragpath);
 }
 
 int MyGLDrawer::createShader(int shaderid, QString shaderpath)
@@ -154,55 +149,38 @@ int MyGLDrawer::createShader(int shaderid, QString shaderpath)
   s.open(QFile::ReadOnly | QFile::Text);
   QTextStream in(&s);
   QString str = in.readAll();
-  const char * pchar = str.toLocal8Bit().constData();
-  glShaderSource(shaderid, 1,(const char**)&pchar, NULL);
-
+  GLint shlen = str.length();
+  char* shtxt = new char[shlen];
+  strcpy(shtxt, str.toLocal8Bit().constData());
+  
+  glShaderSource(shaderid, 1, &shtxt, NULL);
   glCompileShader(shaderid);
 
-  GLint bShaderCompiled;
-  glGetShaderiv(shaderid, GL_COMPILE_STATUS, &bShaderCompiled);
+  delete[] shtxt;
 
+  GLsizei sz;
+  GLchar pText[500];
+
+  glGetShaderSource(shaderid, 500, &sz, pText);
+  DEBUGMSG("Shader code:\n---------\n%s\n---------\n", pText);
+  bool ok = VERIFYSTATUS(Shader, shaderid);
   s.close();
-  if (!bShaderCompiled)
-  {
-     int i32InfoLogLength, i32CharsWritten;
-     glGetShaderiv(shaderid, GL_INFO_LOG_LENGTH, &i32InfoLogLength);
-
-     char* pszInfoLog = new char[i32InfoLogLength];
-     glGetShaderInfoLog(shaderid, i32InfoLogLength, &i32CharsWritten, pszInfoLog);
-
-     DEBUGMSG("Failed to compile shader: %s\n", pszInfoLog);
-     delete [] pszInfoLog;
-     return 0;
-  }
-  return 1;
+  return ok;
 }
 
 int MyGLDrawer::setUpProgram()
 {
-   m_program = glCreateProgram();
-   DEBUGMSG( "m_program : %d \n", m_program);
-   glAttachShader(m_program, m_frag_shader);
-   glAttachShader(m_program, m_vert_shader);
+  m_program = glCreateProgram();
+  glAttachShader(m_program, m_frag_shader);
+  glAttachShader(m_program, m_vert_shader);
 
-   glBindAttribLocation(m_program, m_pos_attr_loc, "aVertex");
-   glBindAttribLocation(m_program, m_tex_attr_loc, "aTexCoords");
+  glBindAttribLocation(m_program, m_pos_attr_loc, "aVertex");
+  glBindAttribLocation(m_program, m_tex_attr_loc, "aTexCoords");
 
-   glLinkProgram(m_program);
-
-   GLint bLinked;
-   glGetProgramiv(m_program, GL_LINK_STATUS, &bLinked);
-
-   if (!bLinked)
-   {
-       int ui32InfoLogLength, ui32CharsWritten;
-       glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &ui32InfoLogLength);
-       char* pszInfoLog = new char[ui32InfoLogLength];
-       glGetProgramInfoLog(m_program, ui32InfoLogLength, &ui32CharsWritten, pszInfoLog);
-       DEBUGMSG("Failed to link program: %s\n", pszInfoLog);
-       delete [] pszInfoLog;
-       return 0;
-   }
+  glLinkProgram(m_program);
+  bool ok = VERIFYSTATUS(Program,  m_program);
+  if (!ok)
+    return 0;
 
   glUseProgram(m_program);
   return 1;
