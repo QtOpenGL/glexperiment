@@ -1,6 +1,5 @@
 TEMPLATE = app
-CONFIG +=  debug_and_release
-SOURCES += main.cpp \
+SOURCES += src/main.cpp \
            src/mygldrawer.cpp \
            src/helper.cpp
 QT+= opengl
@@ -12,15 +11,15 @@ INCLUDEPATH += inc \
                "/usr/include"
 
  CONFIG(debug, debug|release) {
-     DESTDIR = debug
 
  } else {
-    DESTDIR = release
     DEFINES += NDEBUG
  }
 
 HEADERS += \
-    inc/mygldrawer.h
+    inc/mygldrawer.h \
+    inc/helper.hpp \
+    inc/macros.hpp
     inc/helper.hpp
 
 RESOURCES = res.qrc
