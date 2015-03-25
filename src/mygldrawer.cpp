@@ -99,7 +99,7 @@ int MyGLDrawer::setUpAttributes()
   glGenBuffers(1, &m_indx_buffer);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indx_buffer);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3*sizeof(GLubyte), indices, GL_STATIC_DRAW);
-  
+
   return 1;
 }
 
@@ -152,20 +152,14 @@ int MyGLDrawer::createShader(int shaderid, QString shaderpath)
   GLint shlen = str.length();
   char* shtxt = new char[shlen];
   strcpy(shtxt, str.toLocal8Bit().constData());
-  
+
   glShaderSource(shaderid, 1, &shtxt, NULL);
   glCompileShader(shaderid);
 
   delete[] shtxt;
-
-  GLsizei sz;
-  GLchar pText[500];
-
-  glGetShaderSource(shaderid, 500, &sz, pText);
-  DEBUGMSG("Shader code:\n---------\n%s\n---------\n", pText);
-  bool ok = VERIFYSTATUS(Shader, shaderid);
   s.close();
-  return ok;
+  PRINTSHADERCODE(shaderid);
+  return VERIFYSTATUS(Shader, shaderid);
 }
 
 int MyGLDrawer::setUpProgram()
