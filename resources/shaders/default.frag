@@ -1,8 +1,9 @@
-varying vec2 vTexCoords;
+#version 430 core
+#pragma debug(on)
+in vec2 vTexCoords;
+out vec4 frag;
 uniform sampler2D sTex;
 void main (void)
 {
-  gl_FragColor = texture2D(sTex, vTexCoords);
+  frag = texture2D(sTex, vTexCoords);
 }
-
-

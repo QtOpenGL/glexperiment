@@ -4,7 +4,11 @@
 #include <QString>
 
 #ifndef NDEBUG
-  #define DEBUGMSG(format, args...) qDebug("DEBUG %s:%d: %s: "format, __FILE__, __LINE__,__FUNCTION__, ##args)
+  #define DEBUGMSG(format, args...) qDebug("DEBUG %s:%d: %s: "format,\
+                                           __FILE__,\
+                                           __LINE__,\
+                                           __FUNCTION__,\
+                                           ##args)
 
   #define VERIFYSTATUSFUNCDEC(TYPE)\
   int verify ## TYPE ## Status(GLuint handle)\
@@ -22,7 +26,7 @@
       char* pszInfoLog = new char[i32InfoLogLength];\
       glGet ## TYPE ## InfoLog(handle, i32InfoLogLength, &i32CharsWritten, pszInfoLog);\
       QString log = QString::fromLocal8Bit(const_cast<char*>(pszInfoLog), i32CharsWritten);\
-      DEBUGMSG("Failed to compile " #TYPE ": %s\n", log.toLocal8Bit().constData()); \
+      DEBUGMSG("Failed to compile " #TYPE ": %s", log.toLocal8Bit().constData()); \
       delete [] pszInfoLog;\
       return 0;\
     }\
@@ -34,7 +38,7 @@
   glGetShaderiv(HANDLE,GL_SHADER_SOURCE_LENGTH, &sz);\
   GLchar pText[sz];\
   glGetShaderSource(HANDLE, sz, &sz, pText);\
-  DEBUGMSG("Shader (%d) code:\n---------\n%s\n---------\n",HANDLE, pText)
+  DEBUGMSG("Shader (%d) code:\n---------\n%s\n---------",HANDLE, pText)
 
   #define VERIFYSTATUS(TYPE, HANDLE) verify ## TYPE ## Status(HANDLE)
 

@@ -1,10 +1,11 @@
-attribute vec4 aVertex;
-attribute vec2 aTexCoords;
-varying vec2 vTexCoords;
+#version 430 core
+#pragma debug(on)
+in vec4 aVertex;
+in vec2 aTexCoords;
+out vec2 vTexCoords;
 
 void main(void)
 {
   gl_Position = aVertex;
   vTexCoords = aTexCoords;
 }
-
